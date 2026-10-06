@@ -332,7 +332,7 @@ dotnet tool install --global dotnet-ef
 If it is already installed, update it:
 
 ```bash
-dotnet tool update --global dotnet-ef
+dotnet tool install --global dotnet-ef
 ```
 
 Verify it works:
