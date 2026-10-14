@@ -1,80 +1,80 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getErrorMessage } from '../utils/errorHandler';
+import InputField from '../components/InputField';
+import Button from '../components/Button';
 
 export default function RegisterPage() {
   const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { register } = useAuth();
+  // 1. ADDED: pull 'login' from useAuth as well
+  const { register, login } = useAuth(); 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
+      // 2. Register the user in the C# database
       await register(userName, email, password);
-      // Registration succeeded — send them to login
-      navigate('/login');
+      
+      // 3. NEW: Automatically log them in immediately!
+      await login(email, password);
+
+      // 4. Send them straight to the resources dashboard instead of the login page
+      setSuccess('Registration successful! Logging you in...');
+      setTimeout(() => navigate('/resources'), 2000);
     } catch (err) {
-      // Backend returns { error: "Email already taken" } on 400
-      const serverMessage = err.response?.data?.error || 'Registration failed. Please check your inputs.';
-      setError(serverMessage);
-    } finally {
+      setError(getErrorMessage(err));
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '3rem auto', padding: '2rem', border: '1px solid #ccc', borderRadius: '8px' }}>
+    <div className="auth-container">
       <h2>Create an Account</h2>
-      {error && <div style={{ color: 'red', marginBottom: '1rem', background: '#ffebee', padding: '0.5rem', borderRadius: '4px' }}>{error}</div>}
+      
+      {error && <div className="alert alert-error">{error}</div>}
+      {success && <div className="alert alert-success">{success}</div>}
 
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', marginBottom: '0.25rem' }}>Username</label>
-          <input
-            type="text"
-            required
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
-            style={{ width: '100%', padding: '0.5rem', boxSizing: 'border-box' }}
-          />
-        </div>
+      <form onSubmit={handleSubmit} className="auth-form">
+        <InputField 
+          label="Username" 
+          type="text" 
+          value={userName} 
+          onChange={(e) => setUserName(e.target.value)} 
+          required 
+        />
+        <InputField 
+          label="Email" 
+          type="email" 
+          value={email} 
+          onChange={(e) => setEmail(e.target.value)} 
+          required 
+        />
+        <InputField 
+          label="Password" 
+          type="password" 
+          value={password} 
+          onChange={(e) => setPassword(e.target.value)} 
+          required 
+        />
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', marginBottom: '0.25rem' }}>Email</label>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{ width: '100%', padding: '0.5rem', boxSizing: 'border-box' }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '1.5rem' }}>
-          <label style={{ display: 'block', marginBottom: '0.25rem' }}>Password</label>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ width: '100%', padding: '0.5rem', boxSizing: 'border-box' }}
-          />
-        </div>
-
-        <button type="submit" disabled={loading} style={{ width: '100%', padding: '0.75rem', background: '#0066cc', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-          {loading ? 'Registering...' : 'Register'}
-        </button>
+        <Button type="submit" disabled={loading || success} className="btn-primary auth-submit">
+          {loading && !success ? 'Registering...' : success ? 'Success!' : 'Register'}
+        </Button>
       </form>
 
-      <p style={{ marginTop: '1rem', textAlign: 'center' }}>
+      <p className="auth-footer">
         Already have an account? <Link to="/login">Login here</Link>
       </p>
     </div>

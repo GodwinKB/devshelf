@@ -1,42 +1,76 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import './Navbar.css'; // Import the external CSS
+import './navbar.css'; 
 
-export default function Navbar() {
+// 1. IMPORT YOUR LOGO HERE (Make sure the filename matches exactly)
+import myLogo from '../assets/logo.png'; 
+
+function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+    setIsMenuOpen(false);
   };
+
+  const closeMenu = () => setIsMenuOpen(false);
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <h1 className="navbar-logo">
-          <Link to="/">DevShelf</Link>
-        </h1>
         
-        <div className="navbar-links">
+        {/* Brand Logo / Home Link */}
+        <div className="navbar-brand">
+          <Link to="/" className="logo-link" onClick={closeMenu}>
+            {/* 2. ADD THE IMAGE TAG HERE */}
+            <img src={myLogo} alt="DevShelf Logo" className="logo-image" />
+            
+            {/* You can delete this span if you ONLY want the image, or keep it to have the image + text */}
+            <span className="logo-text">DevShelf</span>
+          </Link>
+        </div>
+
+        {/* Mobile Hamburger Button */}
+        <button 
+          className="mobile-menu-btn" 
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          {isMenuOpen ? '✕' : '☰'}
+        </button>
+
+        {/* Dynamic Navigation Links */}
+        <ul className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
           {isAuthenticated ? (
             <>
-              <Link to="/resources">Resources</Link>
-              <Link to="/snippets">Snippets</Link>
-              <Link to="/tasks">Tasks</Link>
-              <span className="welcome-text">Welcome, {user?.userName}</span>
-              <button className="logout-btn" onClick={handleLogout}>
-                Logout
-              </button>
+              <li><Link to="/resources" className="nav-link" onClick={closeMenu}>Resources</Link></li>
+              <li><Link to="/snippets" className="nav-link" onClick={closeMenu}>Snippets</Link></li>
+              <li><Link to="/tasks" className="nav-link" onClick={closeMenu}>Tasks</Link></li>
+              
+              {user?.userName && (
+                <li style={{ color: 'var(--text-main)', fontWeight: 'bold' }}>
+                  {user.userName}
+                </li>
+              )}
+              
+              <li>
+                <button onClick={handleLogout} className="btn-logout">Logout</button>
+              </li>
             </>
           ) : (
             <>
-              <Link to="/login">Login</Link>
-              <Link to="/register">Register</Link>
+              <li><Link to="/login" className="nav-link" onClick={closeMenu}>Login</Link></li>
+              <li><Link to="/register" className="nav-link nav-register" onClick={closeMenu}>Register</Link></li>
             </>
           )}
-        </div>
+        </ul>
+        
       </div>
     </nav>
   );
 }
+
+export default Navbar;
