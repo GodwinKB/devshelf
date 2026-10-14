@@ -5,21 +5,17 @@ using server.Data;
 using server.Services;
 using Scalar.AspNetCore;
 
-
-
 var builder = WebApplication.CreateBuilder(args);
 
-
-
-//Add Ef core plus SQLite
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=devshelf.db";
+// Add EF Core with PostgreSQL
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseNpgsql(connectionString));
 
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<AuthService>();
 
-//Read JWT configuration 
+// Read JWT configuration 
 var jwtKey = builder.Configuration["Jwt:Key"];
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
@@ -43,6 +39,7 @@ builder.Services.AddAuthentication("Bearer")
             ClockSkew = TimeSpan.Zero
         };
     });
+
 // Add CORS to allow frontend requests
 builder.Services.AddCors(options =>
 {
@@ -60,7 +57,6 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddAuthorization();
@@ -85,4 +81,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
