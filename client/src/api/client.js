@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // 1. Create an Axios instance with the backend base URL
 const api = axios.create({
-  baseURL: 'http://localhost:5259/api',
+  baseURL: 'https://devshelf-api-fbfv.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
