@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../api/client';
-import InputField from '../components/inputField';
+import InputField from '../components/InputField';
 import Button from '../components/button';
 
 export default function TasksPage() {
